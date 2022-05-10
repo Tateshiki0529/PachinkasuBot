@@ -70,11 +70,10 @@ class PachinkasuBotMainApp(commands.Cog):
 		await ctx.reply("PachinkasuBot version "+version)
 	
 	@commands.command()
-	async def keiba(self, ctx: discord.Message, mode: str = None, **kwargs):
+	async def keiba(self, ctx: discord.Message, mode: str = None, *args: str):
 		""" 重賞レースの詳細を表示するだけ """
 		try:
 			cmd = mode
-			print(kwargs)
 
 			if cmd is None:
 				cmd = "next"
@@ -85,27 +84,132 @@ class PachinkasuBotMainApp(commands.Cog):
 				header = next(keibaSchedules)
 
 				if cmd == "next":
-					if None is None:
-						pass
+					if None is None: # Shinjiro Koizumi
+						pass # やろうとした事を忘れて残ったデッドスペース的な何か
+					
+					raceFilter = {
+						"grade": None,
+						"location": None,
+						"courseType": None
+					}
+					sep = False
+					output = ""
+					nextRace = None
+					for arg in args:
+						if arg.lower().startswith("grade:"):
+							filter = arg.replace("grade:", "").lower()
+
+							if filter == "g1":
+								raceFilter["grade"] = "G1"
+							elif filter == "g2":
+								raceFilter["grade"] = "G2"
+							elif filter == "g3":
+								raceFilter["grade"] = "G3"
+							elif filter == "j-g1":
+								raceFilter["grade"] = "J-G1"
+							elif filter == "j-g2":
+								raceFilter["grade"] = "J-G2"
+							elif filter == "j-g3":
+								raceFilter["grade"] = "J-G3"
+							else:
+								output += "Warning: クラスフィルタが正しい値ではありません(gradeフィルタは無効化されています)!\n"
+								sep = True
+						
+						if arg.lower().startswith("location:"):
+							filter = arg.replace("location:", "").lower()
+
+							if filter == "sapporo":
+								raceFilter["location"] = "札幌"
+							elif filter == "hakodate":
+								raceFilter["location"] = "函館"
+							elif filter == "fukushima":
+								raceFilter["location"] = "福島"
+							elif filter == "nakayama":
+								raceFilter["location"] = "中山"
+							elif filter == "tokyo":
+								raceFilter["location"] = "東京"
+							elif filter == "niigata":
+								raceFilter["location"] = "新潟"
+							elif filter == "chukyo":
+								raceFilter["location"] = "中京"
+							elif filter == "kyoto":
+								raceFilter["location"] = "京都"
+							elif filter == "hanshin":
+								raceFilter["location"] = "阪神"
+							elif filter == "kokura":
+								raceFilter["location"] = "小倉"
+							else:
+								output += "Warning: 競馬場フィルタが正しい値ではありません(locationフィルタは無効化されています)!\n"
+								sep = True
+						
+						if arg.lower().startswith("type:"):
+							filter = arg.replace("type:", "").lower()
+
+							if filter == "turf":
+								raceFilter["courseType"] = "芝"
+							elif filter == "dirt":
+								raceFilter["courseType"] = "ダート"
+							elif filter == "obstacle":
+								raceFilter["courseType"] = "障害"
+							else:
+								output += "Warning: 馬場特性フィルタが正しい値ではありません(typeフィルタは無効化されています)!\n"
+								sep = True
 					nowTimestamp = int(datetime.datetime.now().timestamp())
+
+					if raceFilter["grade"] is not None:
+						newRow = []
+						for row in keibaSchedules:
+							if row[8] == raceFilter["grade"]:
+								newRow.append(row)
+							elif raceFilter["courseType"] == "障害" and raceFilter["grade"] in row[8]:
+								newRow.append(row)
+						keibaSchedules = newRow
+						output += "クラスフィルタ: " + raceFilter["grade"] + "\n"
+						sep = True
+
+					if raceFilter["location"] is not None:
+						newRow = []
+						for row in keibaSchedules:
+							if row[3] == raceFilter["location"]:
+								newRow.append(row)
+						keibaSchedules = newRow
+						output += "競馬場フィルタ: " + raceFilter["location"] + "\n"
+						sep = True
+					
+					if raceFilter["courseType"] is not None:
+						newRow = []
+						for row in keibaSchedules:
+							if row[4] == raceFilter["courseType"]:
+								newRow.append(row)
+						keibaSchedules = newRow
+						output += "馬場特性フィルタ: " + raceFilter["courseType"] + "\n"
+						sep = True
+
 					for row in keibaSchedules:
 						raceTimestamp = int(datetime.datetime.strptime(row[0], "%Y/%m/%d %H:%M").timestamp())
 						if nowTimestamp < raceTimestamp:
 							nextRace = row
 							break
+						
 					if nextRace is not None:
 						try:
 							date, count, title, location, courseType, distanceCategory, distance, raceNumber, grade = nextRace
 						except IndexError:
 							pass
 						
-						output = "次のレース:\n"
-						if count is not None:
+						if sep:
+							output += "----------\n"
+						output += "次のレース:\n"
+						if count != "":
 							output += "第" + str(count) + "回 "
 						output += title + " (" + grade.replace("1", "Ⅰ").replace("2", "Ⅱ").replace("3", "Ⅲ") + ") " + location + " "
-						if raceNumber is not None:
+						if raceNumber != "":
 							output += "第" + str(raceNumber) + "R"
-						output += " " + courseType + " " + distance + "m (" + distanceCategory + ")\n"
+						output += " " + courseType + " " + distance + "m"
+						if distanceCategory != "- - -":
+							output += " (" + distanceCategory + ")\n"
+						else:
+							output += "\n"
 						output += "出走まで あと " + convertRemainTime(raceTimestamp - nowTimestamp) + " (" + date + ")"
 
 						await ctx.reply(output)
