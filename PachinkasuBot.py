@@ -3,7 +3,7 @@ from discord.ext import commands
 
 channelId = int(conf.CHANNEL_ID)
 prefix = "!"
-version = "2.0.7"
+version = "2.0.8"
 
 def convertRemainTime(time: int) -> str:
 	if time >= (60 * 60 * 24):
