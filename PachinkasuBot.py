@@ -305,7 +305,7 @@ class PachinkasuBotMainApp(commands.Cog):
 	@commands.command()
 	async def yoshinoya(self, ctx: discord.Message):
 		""" シャブ漬けの生娘がいるってマ!? """
-		await ctx.reply(file=discord.File("./images/hHYGmJw.png"))
+		await ctx.reply(file=discord.File("./images/hHYGmJw.jpg"))
 		return
 
 	@commands.command()
