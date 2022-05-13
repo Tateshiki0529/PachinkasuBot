@@ -3,7 +3,7 @@ from discord.ext import commands
 
 channelId = int(conf.CHANNEL_ID)
 prefix = "!"
-version = "2.0.11"
+version = "2.0.12"
 
 def convertRemainTime(time: int) -> str:
 	if time >= (60 * 60 * 24):
@@ -295,10 +295,19 @@ class PachinkasuBotMainApp(commands.Cog):
 		""" みんな大好きシンホギア """
 		await ctx.reply(file=discord.File("./images/D_YqTm2UcAAcCDf.jpg"))
 		return
+
 	@commands.command()
 	async def party(self, ctx: discord.Message):
 		""" 楽しいPartyをはじめよう """
 		await ctx.reply(file=discord.File("./images/IMG_2351.JPG"))
+		return;
+	
+	@commands.command()
+	async def yoshinoya(self, ctx: discord.Message):
+		""" シャブ漬けの生娘がいるってマ!? """
+		await ctx.reply(file=discord.File("./images/hHYGmJw.png"))
+		return
+
 	@commands.command()
 	async def chinko(self, ctx: discord.Message):
 		""" キモすぎ海綿体 """
